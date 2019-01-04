@@ -68,6 +68,6 @@ if __name__ == '__main__':
         if arguments['--mo']:
             populate_ezfio(filename_ezfio, filename_h5)
     
-    subprocess.check_call('h5_basis_id="%s" h5_int_path="%s" qp_run read %s' % (int(arguments['--ao']), filename_h5, filename_ezfio),
+    subprocess.check_call('h5_basis_id="%s" h5_int_path="%s" qp_run read_h5 %s' % (int(arguments['--ao']), filename_h5, filename_ezfio),
                           shell=True )
     
