@@ -119,11 +119,12 @@ program main
     if (basis_id == 0) then 
         call map_sort(mo_integrals_map)
         call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
-        call ezfio_set_integrals_bielec_disk_access_mo_integrals('Read')
+        call ezfio_set_mo_two_e_integrals_disk_access_mo_integrals('Read')
     else 
         call map_sort(ao_integrals_map)
         call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-        call ezfio_set_integrals_bielec_disk_access_ao_integrals('Read')
+        call ezfio_set_mo_two_e_integrals_disk_access_ao_integrals('Read')
+
     endif
     !Now n_to_read == 0 and i_int = n_bielec_int)
     deallocate(buffer_values,buffer_i)
