@@ -75,11 +75,11 @@ program main
     end do
 
     if (basis_id == 0) then
-        call ezfio_set_mo_one_e_integrals_integral_c(buffer_values_hcore)
-        call ezfio_set_mo_one_e_integrals_disk_access_mo_one_integrals_c("Read")
+        call ezfio_set_mo_one_e_integrals_integral_combined(buffer_values_hcore)
+        call ezfio_set_mo_one_e_integrals_disk_access_mo_one_integrals("Read")
     else
-        call ezfio_set_ao_one_e_integrals_integral_c(buffer_values_hcore)
-        call ezfio_set_ao_one_e_integrals_disk_access_ao_one_integrals_c("Read")
+        call ezfio_set_ao_one_e_integrals_integral_combined(buffer_values_hcore)
+        call ezfio_set_ao_one_e_integrals_disk_access_ao_one_integrals("Read")
     endif
     deallocate(buffer_i_hcore, buffer_values_hcore_h5, buffer_values_hcore)
 
