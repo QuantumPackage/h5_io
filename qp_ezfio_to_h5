@@ -35,4 +35,3 @@ if __name__ == '__main__':
             f['MO_basis/mo_num'] = ezfio.mo_basis_mo_num
             f['electrons/elec_alpha_num'] = ezfio.electrons_elec_alpha_num
             f['electrons/elec_beta_num'] = ezfio.electrons_elec_beta_num
-   

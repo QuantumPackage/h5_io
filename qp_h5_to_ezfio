@@ -31,7 +31,6 @@ def populate_ezfio(ezfio_filename, h5_filename):
 
     with h5py.File(h5_filename, 'r') as f:
 
-        #mo_tot_num = f['MO_basis/mo_tot_num'][()][0] # FIX ANOUAR
         mo_tot_num = f['MO_basis/mo_num'][()]
 
         nun_elec_alpha = f['electrons/elec_alpha_num'][()]

@@ -46,7 +46,7 @@ program main
 
      CALL GET_ENVIRONMENT_VARIABLE("h5_chunk_size", chunk_size_str, status = err)
      if ( err .ne. 0) then
-          chunk_size = 100 !*1000
+          chunk_size = 100*1000
     else
           read(chunk_size_str, '(i)') chunk_size
     endif
@@ -101,7 +101,6 @@ program main
             call insert_into_mo_integrals_map(chuck_size_cur, buffer_i,buffer_values)
         else
             call insert_into_ao_integrals_map(chuck_size_cur, buffer_i,buffer_values)
-            !call map_update(ao_integrals_map, buffer_i, buffer_values, chuck_size_cur)
         endif
         i_int = i_int + chuck_size_cur
         n_to_read = n_to_read - chuck_size_cur
