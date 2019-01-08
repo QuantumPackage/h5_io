@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 '''
 Usage:
-    qp_h5_to_ezfio (integrals|bootstrap) <ez> [<h5>] (--ao|--mo)
+    qp_h5_to_ezfio (integrals|bootstrap|labeled) <ez> [<h5>] (--ao|--mo)
 '''
 
 from __future__ import print_function
@@ -14,20 +14,34 @@ import subprocess
 
 H5_DEFAULT = 'qp_in.h5'
 
+def run_qp_create(ezfio_filename, h5_filename):
+    ao_basis_name = f['ao_basis/ao_basis'][()]
+
+    #pseudo_name = f['ao_basis/ao_basis_pseudo'][()]
+    nucl_coord = f['nuclei/nucl_coord'][()]
+    nucl_label = f['nuclei/nucl_label'][()] 
+
+    nun_elec_alpha = f['electrons/elec_alpha_num'][()]
+    num_elec_beta = f['electrons/elec_beta_num'][()]
+
+
+    
 def populate_ezfio(ezfio_filename, h5_filename):
     ezfio.set_file(ezfio_filename)
 
     with h5py.File(h5_filename, 'r') as f:
 
-        mo_tot_num = f['MO_basis/mo_tot_num'][()]
+        #mo_tot_num = f['MO_basis/mo_tot_num'][()][0] # FIX ANOUAR
+        mo_tot_num = f['MO_basis/mo_num'][()]
+
         nun_elec_alpha = f['electrons/elec_alpha_num'][()]
         num_elec_beta = f['electrons/elec_beta_num'][()]
         nuclear_repulsion = f['nuclei/nuclear_repulsion'][()]
 
-    ezfio.electrons_elec_alpha_num = nun_elec_alpha
-    ezfio.electrons_elec_beta_num = num_elec_beta
-   
+    ezfio.set_electrons_elec_alpha_num(nun_elec_alpha)
+    ezfio.set_electrons_elec_beta_num(num_elec_beta)
     nucl_num = 1
+
     ezfio.set_nuclei_nucl_num(nucl_num)
     ezfio.set_nuclei_nucl_charge([42.]*nucl_num)
     ezfio.set_nuclei_nucl_coord( [ [0.], [0.], [0.] ]*nucl_num )
@@ -53,7 +67,7 @@ def populate_ezfio(ezfio_filename, h5_filename):
     # Mo coef
     mo_coef =  [0]*mo_tot_num * ao_num
     
-    ezfio.set_mo_basis_mo_tot_num(mo_tot_num)
+    ezfio.set_mo_basis_mo_num(mo_tot_num)
     ezfio.set_mo_basis_mo_coef(mo_coef)
 
 if __name__ == '__main__':

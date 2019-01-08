@@ -46,15 +46,15 @@ program main
 
      CALL GET_ENVIRONMENT_VARIABLE("h5_chunk_size", chunk_size_str, status = err)
      if ( err .ne. 0) then
-          chunk_size = 100*1000
+          chunk_size = 100 !*1000
     else
           read(chunk_size_str, '(i)') chunk_size
     endif
 
-
     call get_param_h5_int(trim(h5path)//c_null_char, n_bielec_int, n_hcore_int, basis_id)
+
     if ( basis_id.eq. 0 ) then
-        o_tot_num_h5 = mo_tot_num
+        o_tot_num_h5 = mo_num
     else
         o_tot_num_h5 = ao_num
     endif
@@ -67,19 +67,19 @@ program main
 
     buffer_values_hcore(:,:) = 0.d0 ! Assume that we may read sparse
                                     ! reprensation, but we store dense one
-    !$PRAGMA OMP SIMD PRIVATE(a,b) 
-    do j = 1, n_hcore_int*n_hcore_int
+    !$OMP SIMD PRIVATE(a,b) 
+    do j = 1, n_hcore_int
             a = buffer_i_hcore(1,j)
             b = buffer_i_hcore(2,j)
             buffer_values_hcore(a+1,b+1) =buffer_values_hcore_h5(j) 
     end do
 
     if (basis_id == 0) then
-        call ezfio_set_mo_one_e_integrals_integral_combined(buffer_values_hcore)
-        call ezfio_set_mo_one_e_integrals_disk_access_mo_one_integrals("Read")
+        call ezfio_set_mo_one_e_ints_mo_one_e_integrals(buffer_values_hcore)
+        call ezfio_set_mo_one_e_ints_io_mo_one_e_integrals("Read")
     else
-        call ezfio_set_ao_one_e_integrals_integral_combined(buffer_values_hcore)
-        call ezfio_set_ao_one_e_integrals_disk_access_ao_one_integrals("Read")
+        call ezfio_set_ao_one_e_ints_ao_one_e_integrals(buffer_values_hcore)
+        call ezfio_set_ao_one_e_ints_io_ao_one_e_integrals("Read")
     endif
     deallocate(buffer_i_hcore, buffer_values_hcore_h5, buffer_values_hcore)
 
@@ -100,12 +100,12 @@ program main
         if (basis_id == 0) then
             call insert_into_mo_integrals_map(chuck_size_cur, buffer_i,buffer_values)
         else
-            !call insert_into_ao_integrals_map(chuck_size_cur, buffer_i,buffer_values)
-            call map_update(ao_integrals_map, buffer_i, buffer_values, chuck_size_cur)
+            call insert_into_ao_integrals_map(chuck_size_cur, buffer_i,buffer_values)
+            !call map_update(ao_integrals_map, buffer_i, buffer_values, chuck_size_cur)
         endif
         i_int = i_int + chuck_size_cur
         n_to_read = n_to_read - chuck_size_cur
-        print *, 'Bielect integral: Commited ', i_int, 'integral ', n_to_read, 'to go'
+        !print *, 'Bielect integral: Commited ', i_int, 'integral ', n_to_read, 'to go'
    end do
 
     print*, 'Sorting the mo_integrals_map'
@@ -119,11 +119,11 @@ program main
     if (basis_id == 0) then 
         call map_sort(mo_integrals_map)
         call map_save_to_disk(trim(ezfio_filename)//'/work/mo_ints',mo_integrals_map)
-        call ezfio_set_mo_two_e_integrals_disk_access_mo_integrals('Read')
+        call ezfio_set_mo_two_e_ints_io_mo_two_e_integrals('Read')
     else 
         call map_sort(ao_integrals_map)
         call map_save_to_disk(trim(ezfio_filename)//'/work/ao_ints',ao_integrals_map)
-        call ezfio_set_ao_two_e_integrals_disk_access_ao_integrals('Read')
+        call ezfio_set_ao_two_e_ints_io_ao_two_e_integrals('Read')
 
     endif
     !Now n_to_read == 0 and i_int = n_bielec_int)

@@ -32,11 +32,7 @@ if __name__ == '__main__':
 
         with h5py.File(filename_h5, 'r+') as f:
 
-            f['MO_basis/mo_tot_num'] = ezfio.mo_basis_mo_tot_num
-            #if arguments['--ao']:
-            #    f['AO_basis/ao_num'] = ezfio.ao_basis_ao_num
-            #    f.create_dataset('MO_basis/mo_coef', (ezfio.mo_basis_mo_tot_num, ezfio.ao_basis_ao_num), dtype='f', data=ezfio.mo_basis_mo_coef)
-             
+            f['MO_basis/mo_num'] = ezfio.mo_basis_mo_num
             f['electrons/elec_alpha_num'] = ezfio.electrons_elec_alpha_num
             f['electrons/elec_beta_num'] = ezfio.electrons_elec_beta_num
    

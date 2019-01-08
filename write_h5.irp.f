@@ -47,7 +47,7 @@ program print_integrals
     ! Set param in hd5f
 
     if (basis_id .eq. 0) then
-        o_tot_num = mo_tot_num
+        o_tot_num = mo_num
     else
         o_tot_num = ao_num
     endif
@@ -63,10 +63,10 @@ program print_integrals
    real(integral_kind), pointer   :: val(:)
 
    if (basis_id .eq. 0) then
-        PROVIDE mo_bielec_integrals_in_map
+        PROVIDE mo_two_e_integrals_in_map
         o_map_size = get_mo_map_size();
    else
-        PROVIDE ao_bielec_integrals_in_map
+        PROVIDE ao_two_e_integrals_in_map
         o_map_size = get_ao_map_size();
    endif
    
@@ -109,9 +109,9 @@ program print_integrals
   call write_bielec_h5(trim(h5path)//c_null_char, buffer_i, buffer_values,basis_id)
 
   if (basis_id .eq. 0) then
-      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, mo_mono_elec_integral, basis_id)
+      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, mo_one_e_integrals, basis_id)
   else
-      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, ao_mono_elec_integral, basis_id)
+      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, ao_one_e_integrals, basis_id)
   endif
 
 end

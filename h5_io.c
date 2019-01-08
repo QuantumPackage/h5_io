@@ -11,7 +11,7 @@
 
 void strcati(char *foobar, char *foo, char *bar) {
   // Concat foo and bar and copying it  foobar"
-  // Assume foobar is larg enought"
+  // Assume foobar is large enought"
   memset(foobar, 0, strlen(foobar));
   strcpy(foobar, foo);
   strcat(foobar, bar);
@@ -24,7 +24,7 @@ void H5Dread666(hid_t file_id, char *h, char *path, hid_t H5T_USER, void *data) 
 
   char str[80];
   strcati(str, h, path);
-
+  printf("h5: Reading %s \n", str);
   dataset_id = H5Dopen(file_id, str, H5P_DEFAULT);
   status = H5Dread(dataset_id, H5T_USER, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   status = H5Dclose(dataset_id);
@@ -40,6 +40,9 @@ void H5Dread666_hyperslab(hid_t file_id, char *h, char *path, hsize_t *start, hs
   memspace = H5Screate_simple(1, count, NULL);
 
   strcati(str, h, path);
+  printf("h5: Reading %s from %i to %i \n", str, start[0], start[0]+count[0]);
+
+
   dataset_id = H5Dopen(file_id, str, H5P_DEFAULT);
 
   dataspace_id = H5Dget_space(dataset_id);
@@ -58,18 +61,23 @@ void H5Dcreate666(hid_t file_id, char *h, char *path, hsize_t *dims, int dims_si
   dataspace_id = H5Screate_simple(dims_size, dims, NULL);
   char str[80];
   strcati(str, h, path);
+  printf("h5: Creating %s \n", str);
+
   dataset_id = H5Dcreate2(file_id, str, H5T_USER, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dclose(dataset_id);
   status = H5Sclose(dataspace_id);
 }
 
-void H5Dcreate666w(hid_t file_id, char *h, char *path, hsize_t *dims, int dims_size, hid_t H5T_USER, void *data) {
+void H5Dcreate_scalar666w(hid_t file_id, char *h, char *path, hid_t H5T_USER, void *data) {
   herr_t status;
   hid_t dataspace_id, dataset_id;
 
-  dataspace_id = H5Screate_simple(dims_size, dims, NULL);
+  dataspace_id = H5Screate(H5S_SCALAR);
+  
   char str[80];
   strcati(str, h, path);
+  printf("h5: Creating and writting scalar %s \n", str);
+
   dataset_id = H5Dcreate2(file_id, str, H5T_USER, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   status = H5Dwrite(dataset_id, H5T_USER, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   status = H5Dclose(dataset_id);
@@ -83,6 +91,7 @@ void H5Dwrite666(hid_t file_id, char *h, char *path, hid_t H5T_USER, void *data)
 
   char str[80];
   strcati(str, h, path);
+  printf("h5: Writing %s \n", str);
 
   dataset_id = H5Dopen(file_id, str, H5P_DEFAULT);
   status = H5Dwrite(dataset_id, H5T_USER, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
@@ -97,22 +106,22 @@ void H5Dwrite666(hid_t file_id, char *h, char *path, hid_t H5T_USER, void *data)
 */
 void get_param_h5_int_(char *h5path, int *n_bielec, int *n_hcore, int *flag) {
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
 
   hid_t file_id;
   herr_t status;
 
   file_id = H5Fopen(h5path, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-  H5Dread666(file_id, h, "/integrals/bielec/n", H5T_NATIVE_INT, n_bielec);
-  H5Dread666(file_id, h, "/integrals/monoelec/hcore/n", H5T_NATIVE_INT, n_hcore);
+  H5Dread666(file_id, h, "/ints/two_e/n", H5T_NATIVE_INT, n_bielec);
+  H5Dread666(file_id, h, "/ints/one_e/hcore/n", H5T_NATIVE_INT, n_hcore);
 
   status = H5Fclose(file_id);
 }
 
 void read_bielec_h5_(char *h5path, int32_t *bielec_idx, double *bielec_val, int *offset, int *chunk_size, int *flag) {
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
 
   hid_t file_id; /* identifiers */
   herr_t status;
@@ -126,23 +135,23 @@ void read_bielec_h5_(char *h5path, int32_t *bielec_idx, double *bielec_val, int 
 
   memspace = H5Screate_simple(1, count, NULL);
 
-  H5Dread666_hyperslab(file_id, h, "/integrals/bielec/value", start, count, memspace, H5T_NATIVE_DOUBLE, bielec_val);
-  H5Dread666_hyperslab(file_id, h, "/integrals/bielec/idx", start, count, memspace, H5T_NATIVE_LLONG, bielec_idx);
+  H5Dread666_hyperslab(file_id, h, "/ints/two_e/value", start, count, memspace, H5T_NATIVE_DOUBLE, bielec_val);
+  H5Dread666_hyperslab(file_id, h, "/ints/two_e/idx", start, count, memspace, H5T_NATIVE_LLONG, bielec_idx);
 
   status = H5Fclose(file_id);
 }
 
 void read_hcore_h5_(char *h5path, int32_t *bielec_idx, double *bielec_val, int *flag) {
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
 
   hid_t file_id; /* identifiers */
   herr_t status;
 
   file_id = H5Fopen(h5path, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-  H5Dread666(file_id, h, "/integrals/monoelec/hcore/value", H5T_NATIVE_DOUBLE, bielec_val);
-  H5Dread666(file_id, h, "/integrals/monoelec/hcore/idx", H5T_NATIVE_LLONG, bielec_idx);
+  H5Dread666(file_id, h, "/ints/one_e/hcore/value", H5T_NATIVE_DOUBLE, bielec_val);
+  H5Dread666(file_id, h, "/ints/one_e/hcore/idx", H5T_NATIVE_LLONG, bielec_idx);
 
   status = H5Fclose(file_id);
 }
@@ -170,41 +179,39 @@ void write_init_h5_(char *h5path, int *o_tot_num, int *bi_elec_num, int *flag, d
   /* Set flag for intermediate group creation */
   status = H5Pset_create_intermediate_group(grp_crt_plist, 1);
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
   char str[80];
 
-  strcati(str, h, "/integrals/monoelec/hcore");
+  strcati(str, h, "/ints/one_e/hcore");
   dataset_id = H5Gcreate2(file_id, str, grp_crt_plist, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(dataset_id);
 
   dims[0] = 1;
-  H5Dcreate666w(file_id, h, "/integrals/monoelec/hcore/n", dims, 1, H5T_NATIVE_INT, o_tot_num);
+
+  int n = o_tot_num[0]*o_tot_num[0];
+  H5Dcreate_scalar666w(file_id, h, "/ints/one_e/hcore/n", H5T_NATIVE_INT, &n);
 
   dims[0] = o_tot_num[0] * o_tot_num[0];
   dims[1] = 2;
-  H5Dcreate666(file_id, h, "/integrals/monoelec/hcore/idx", dims, 2, H5T_NATIVE_INT);
-  H5Dcreate666(file_id, h, "/integrals/monoelec/hcore/value", dims, 1, H5T_NATIVE_DOUBLE);
+  H5Dcreate666(file_id, h, "/ints/one_e/hcore/idx", dims, 2, H5T_NATIVE_INT);
+  H5Dcreate666(file_id, h, "/ints/one_e/hcore/value", dims, 1, H5T_NATIVE_DOUBLE);
 
-  strcati(str, h, "/integrals/bielec");
+  strcati(str, h, "/ints/two_e");
   dataset_id = H5Gcreate2(file_id, str, grp_crt_plist, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(dataset_id);
 
-  dims[0] = 1;
-  H5Dcreate666w(file_id, h, "/integrals/bielec/n", dims, 1, H5T_NATIVE_INT, bi_elec_num);
+  H5Dcreate_scalar666w(file_id, h, "/ints/two_e/n", H5T_NATIVE_INT, bi_elec_num);
 
   dims[0] = bi_elec_num[0];
-  H5Dcreate666(file_id, h, "/integrals/bielec/idx", dims, 1, H5T_NATIVE_LLONG);
-  H5Dcreate666(file_id, h, "/integrals/bielec/value", dims, 1, H5T_NATIVE_DOUBLE);
+  H5Dcreate666(file_id, h, "/ints/two_e/idx", dims, 1, H5T_NATIVE_LLONG);
+  H5Dcreate666(file_id, h, "/ints/two_e/value", dims, 1, H5T_NATIVE_DOUBLE);
 
 
 
   dataset_id = H5Gcreate2(file_id, "nuclei", grp_crt_plist, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(dataset_id);
 
-  dims[0] = 1;
-  H5Dcreate666w(file_id, "nuclei", "/nuclear_repulsion", dims, 1, H5T_NATIVE_DOUBLE, nr);
-
-
+  H5Dcreate_scalar666w(file_id, "nuclei", "/nuclear_repulsion", H5T_NATIVE_DOUBLE, nr);
 
   status = H5Fclose(file_id);
 }
@@ -224,14 +231,13 @@ void write_hcore_h5_(char *h5path, int *o_tot_num, double *moelec_val, int *flag
     }
   }
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
 
   file_id = H5Fopen(h5path, H5F_ACC_RDWR, H5P_DEFAULT);
 
-  H5Dwrite666(file_id, h, "/integrals/monoelec/hcore/idx", H5T_NATIVE_LLONG, ptr);
-  H5Dwrite666(file_id, h, "/integrals/monoelec/hcore/value", H5T_NATIVE_DOUBLE, moelec_val);
+  H5Dwrite666(file_id, h, "/ints/one_e/hcore/idx", H5T_NATIVE_LLONG, ptr);
+  H5Dwrite666(file_id, h, "/ints/one_e/hcore/value", H5T_NATIVE_DOUBLE, moelec_val);
 
-  /* Close file */
   status = H5Fclose(file_id);
 }
 
@@ -242,11 +248,10 @@ void write_bielec_h5_(char *h5path, int *bielec_idx, int *bielec_val, int *flag)
 
   file_id = H5Fopen(h5path, H5F_ACC_RDWR, H5P_DEFAULT);
 
-  char *h = (flag[0] == 0) ? "MO_basis" : "AO_basis";
+  char *h = (flag[0] == 0) ? "mo" : "ao";
 
-  H5Dwrite666(file_id, h, "/integrals/bielec/idx", H5T_NATIVE_LLONG, bielec_idx);
-  H5Dwrite666(file_id, h, "/integrals/bielec/value", H5T_NATIVE_DOUBLE, bielec_val);
+  H5Dwrite666(file_id, h, "/ints/two_e/idx", H5T_NATIVE_LLONG, bielec_idx);
+  H5Dwrite666(file_id, h, "/ints/two_e/value", H5T_NATIVE_DOUBLE, bielec_val);
 
-  /* Close file */
   status = H5Fclose(file_id);
 }
