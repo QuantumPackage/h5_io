@@ -10,7 +10,7 @@ program main
     
     integer :: err
     
-    integer :: n_bielec_int, n_hcore_int, n_to_read, o_tot_num_h5
+    integer :: n_bielec_int, n_hcore_int, n_to_read, o_num_h5
     integer :: i_int, chuck_size_cur 
 
     real(integral_kind), allocatable :: buffer_values(:)
@@ -54,15 +54,15 @@ program main
     call get_param_h5_int(trim(h5path)//c_null_char, n_bielec_int, n_hcore_int, basis_id)
 
     if ( basis_id.eq. 0 ) then
-        o_tot_num_h5 = mo_num
+        o_num_h5 = mo_num
     else
-        o_tot_num_h5 = ao_num
+        o_num_h5 = ao_num
     endif
     !                                             _                
     ! |\/|  _  ._   _   _  |  _   _      /   |_| /   _  ._ _    \  
     ! |  | (_) | | (_) (/_ | (/_ (_     |    | | \_ (_) | (/_    | 
     !                                    \                      /  
-    allocate(buffer_i_hcore(2,n_hcore_int), buffer_values_hcore_h5(n_hcore_int), buffer_values_hcore(o_tot_num_h5,o_tot_num_h5))
+    allocate(buffer_i_hcore(2,n_hcore_int), buffer_values_hcore_h5(n_hcore_int), buffer_values_hcore(o_num_h5,o_num_h5))
     call read_hcore_h5(trim(h5path)//c_null_char,buffer_i_hcore, buffer_values_hcore_h5, basis_id)
 
     buffer_values_hcore(:,:) = 0.d0 ! Assume that we may read sparse
@@ -89,7 +89,7 @@ program main
     !                   
     allocate(buffer_values(chunk_size), buffer_i(chunk_size))
     
-    print*, 'Bielect integral: number of int to read: ', n_bielec_int
+    print*, 'Integral two-e: number of to read: ', n_bielec_int
 
     n_to_read = n_bielec_int
     i_int = 0
@@ -108,7 +108,7 @@ program main
         !print *, 'Bielect integral: Commited ', i_int, 'integral ', n_to_read, 'to go'
    end do
 
-    print*, 'Sorting the mo_integrals_map'
+    print*, 'Sorting the integrals_map'
     if (basis_id == 0) then
         call map_sort(mo_integrals_map)
         !call map_unique(mo_integrals_map) ! Assume key are already unique

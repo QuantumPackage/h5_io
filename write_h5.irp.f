@@ -10,7 +10,7 @@ program print_integrals
 
     integer :: err
 
-    integer :: n_bielec_int, n_hcore_int, n_to_read, o_tot_num_h5
+    integer :: n_bielec_int, n_hcore_int, n_to_read, o_num_h5
     integer :: i_int, chuck_size_cur
 
     real(integral_kind), allocatable :: buffer_values(:)
@@ -25,7 +25,7 @@ program print_integrals
     integer :: basis_id = 1
     integer*8 :: i,j, a,b, n
 
-    integer :: o_tot_num
+    integer :: o_num
     PROVIDE ezfio_filename
     !  _
     ! |_) _. ._ _. ._ _
@@ -47,9 +47,9 @@ program print_integrals
     ! Set param in hd5f
 
     if (basis_id .eq. 0) then
-        o_tot_num = mo_num
+        o_num = mo_num
     else
-        o_tot_num = ao_num
+        o_num = ao_num
     endif
 
     !                                             _
@@ -69,7 +69,8 @@ program print_integrals
         PROVIDE ao_two_e_integrals_in_map
         o_map_size = get_ao_map_size();
    endif
-   
+  
+   ! WARNING: This can blowup. We should write in batch
    allocate (buffer_values(o_map_size), buffer_i(o_map_size))
 
    integer*8 k
@@ -103,15 +104,15 @@ program print_integrals
     enddo
    endif
    
-  call write_init_h5(trim(h5path)//c_null_char, o_tot_num, k, basis_id, nuclear_repulsion)
+  call write_init_h5(trim(h5path)//c_null_char, o_num, k, basis_id, nuclear_repulsion)
 
   
   call write_bielec_h5(trim(h5path)//c_null_char, buffer_i, buffer_values,basis_id)
 
   if (basis_id .eq. 0) then
-      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, mo_one_e_integrals, basis_id)
+      call write_hcore_h5(trim(h5path)//c_null_char, o_num, mo_one_e_integrals, basis_id)
   else
-      call write_hcore_h5(trim(h5path)//c_null_char, o_tot_num, ao_one_e_integrals, basis_id)
+      call write_hcore_h5(trim(h5path)//c_null_char, o_num, ao_one_e_integrals, basis_id)
   endif
 
 end
